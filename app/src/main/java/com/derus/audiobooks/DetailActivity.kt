@@ -2,15 +2,11 @@ package com.derus.audiobooks
 
 import android.app.ProgressDialog
 import android.content.DialogInterface
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageButton
-import android.widget.SeekBar
-import android.widget.TextView
 import android.widget.Toast
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_detail.*
@@ -23,15 +19,7 @@ import java.io.*
 
 class DetailActivity : AppCompatActivity(), View.OnClickListener {
 
-    /**
-     * help to toggle between play and pause.
-     */
     private var mMyMediaPlayer: MyMediaPlayer? = null
-    private var mMediaPlayer: MediaPlayer? = null
-    private var mPlayPauseButton: ImageButton? = null
-    private var mSeekbar:SeekBar? = null
-    private var mTimer: TextView? = null
-    private var seekBarHandler:SeekBarHandler? = null
     private val api = ApiService()
     private var str: String = ""
     private var file: File? = null
@@ -61,11 +49,7 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         if (file!!.exists())
         mMyMediaPlayer = MyMediaPlayer(this, file!!, play_pause_btn, progressbar, tv_progress)
 
-
-        mPlayPauseButton = play_pause_btn
-        mPlayPauseButton?.setOnClickListener(this)
-
-        mTimer = tv_progress
+        play_pause_btn.setOnClickListener(this)
 
         song_title.setText(title)
         song_artist.setText(author)
@@ -73,10 +57,68 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-    fun createDirectory(directory: String) {
-        val directoryFile = File(directory)
-        if (!directoryFile.exists())
-            directoryFile.mkdirs()
+    override fun onPause() {
+        super.onPause()
+        if (mMyMediaPlayer?.getMediaPlayer() != null && mMyMediaPlayer!!.isPlaying()) {
+            mMyMediaPlayer!!.pauseAudio()
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (mMyMediaPlayer?.getMediaPlayer() != null)
+            mMyMediaPlayer!!.relaxResources(true)
+    }
+
+    override fun onClick(v: View?) {
+        if (v?.id == R.id.play_pause_btn) {
+            togglePlayback()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.detail, menu)
+
+        if (file!!.exists()){
+            menu?.findItem(R.id.action_download)?.setIcon(R.drawable.ic_delete_file)
+        }else{
+            menu?.findItem(R.id.action_download)?.setIcon(R.drawable.ic_download_file)
+        }
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+
+        val id = item?.itemId
+        if(id == R.id.action_download){
+            if (file?.exists()!! && !mMyMediaPlayer!!.isPlaying()){
+                deleteFiles(directory!!)
+                mMyMediaPlayer?.relaxResources(true)
+                mMyMediaPlayer?.resetProgress()
+                invalidateOptionsMenu()
+            }else{
+                downloadMp3File(file!!, urlFile)
+                //invalidateOptionsMenu()
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun togglePlayback() {
+        if (file!!.exists()) {
+            if (mMyMediaPlayer != null) {
+                if (mMyMediaPlayer!!.isPlaying()) {
+                    mMyMediaPlayer!!.pauseAudio()
+                } else {
+                    mMyMediaPlayer!!.createMediaPlayerIfNeeded()
+                    mMyMediaPlayer!!.playAudio()
+                }
+            }
+        }else {
+            downloadMp3File(file!!, urlFile)
+        }
     }
 
     fun getAudiobook(url: String): Audiobook{
@@ -129,8 +171,8 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
             }
         })
 
-        progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Anuluj", DialogInterface.OnClickListener {
-            dialog, which ->
+        progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Anuluj", {
+            _, _ ->
             progress.dismiss()
             call.cancel()
         })
@@ -179,69 +221,10 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-    override fun onClick(v: View?) {
-        if (v?.id == R.id.play_pause_btn) {
-            togglePlayback()
-        }
-    }
-
-    fun togglePlayback() {
-        if (file!!.exists()) {
-            if (mMyMediaPlayer != null) {
-                if (mMyMediaPlayer!!.isPlaying()) {
-                    mMyMediaPlayer!!.pauseAudio()
-                } else {
-                    mMyMediaPlayer!!.createMediaPlayerIfNeeded()
-                    mMyMediaPlayer!!.playAudio()
-                }
-            }
-        }else {
-            Toast.makeText(this, "Pobierz plik audio!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (mMyMediaPlayer?.getMediaPlayer() != null && mMyMediaPlayer!!.isPlaying()) {
-            mMyMediaPlayer!!.pauseAudio()
-        }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if (mMyMediaPlayer?.getMediaPlayer() != null)
-        mMyMediaPlayer!!.relaxResources(true)
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.detail, menu)
-
-        if (file!!.exists()){
-            menu?.findItem(R.id.action_download)?.setIcon(R.drawable.ic_delete_file)
-        }else{
-            menu?.findItem(R.id.action_download)?.setIcon(R.drawable.ic_download_file)
-        }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-
-        val id = item?.itemId
-        if(id == R.id.action_download){
-            if (file?.exists()!! && !mMyMediaPlayer!!.isPlaying()){
-                deleteFiles(directory!!)
-                mMyMediaPlayer?.relaxResources(true)
-                mMyMediaPlayer?.resetProgress()
-                invalidateOptionsMenu()
-            }else{
-                downloadMp3File(file!!, urlFile)
-                //invalidateOptionsMenu()
-            }
-        }
-
-        return super.onOptionsItemSelected(item)
+    fun createDirectory(directory: String) {
+        val directoryFile = File(directory)
+        if (!directoryFile.exists())
+            directoryFile.mkdirs()
     }
 
     fun deleteFiles(fileOrDirectory: File) {

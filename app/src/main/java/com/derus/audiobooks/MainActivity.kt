@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity(), OnBookClickListener {
 
     override fun OnBookClick(url: String, imageUrl: String, title: String, author: String) {
         //Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
-        if (url.isNullOrEmpty()) {
+        if (url.isEmpty()) {
             Toast.makeText(applicationContext, "Nie ma url!", Toast.LENGTH_SHORT).show()
         } else {
             val intent = Intent(this, DetailActivity::class.java)
@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), OnBookClickListener {
         val api = ApiService()
         val list = ArrayList<AudiobookResponse>()
         recyclerView.adapter = AudiobookAdapter(list, this)
+        recyclerView.setHasFixedSize(true)
         fastscroll.setRecyclerView(recyclerView)
 
         api.getAudiobooksList().enqueue(object: Callback<ArrayList<AudiobookResponse>> {

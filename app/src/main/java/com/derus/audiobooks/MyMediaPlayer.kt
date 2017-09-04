@@ -10,9 +10,6 @@ import android.widget.SeekBar
 import android.widget.TextView
 import java.io.File
 
-/**
- * Created by Michal on 04.09.2017.
- */
 class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: ImageButton, val mSeekbar: SeekBar, val mTimer: TextView) : MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener {
 
@@ -30,9 +27,7 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
      * already exists.
      */
 
-    fun getMediaPlayer(): MediaPlayer? {
-        return mMediaPlayer
-    }
+    fun getMediaPlayer(): MediaPlayer? = mMediaPlayer
 
     fun resetProgress(){
         mSeekbar.progress = 0
@@ -64,20 +59,25 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
 
     fun playAudio() {
         mMediaPlayer?.start()
-        seekBarHandler = SeekBarHandler(mSeekbar, mMediaPlayer, isViewOn = true, timer = mTimer!!)
+        seekBarHandler = SeekBarHandler(mSeekbar, mMediaPlayer, isViewOn = true, timer = mTimer)
         seekBarHandler?.execute()
         val pauseDrawabale = ContextCompat.getDrawable(context, android.R.drawable.ic_media_pause)
-        mPlayPauseButton?.setImageDrawable(pauseDrawabale)
+        mPlayPauseButton.setImageDrawable(pauseDrawabale)
     }
 
     fun pauseAudio() {
         seekBarHandler?.cancel(true)
         mMediaPlayer?.pause()
         val playDrawabale = ContextCompat.getDrawable(context, android.R.drawable.ic_media_play)
-        mPlayPauseButton?.setImageDrawable(playDrawabale)
+        mPlayPauseButton.setImageDrawable(playDrawabale)
     }
 
-    fun isPlaying(): Boolean = mMediaPlayer!!.isPlaying
+    fun isPlaying(): Boolean {
+        if (mMediaPlayer != null)
+            return mMediaPlayer!!.isPlaying
+        else
+            return false
+    }
 
     /**
      * Releases resources used by the service for playback. This includes the
@@ -100,13 +100,12 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
     override fun onCompletion(mp: MediaPlayer?) {
         relaxResources(true)
         val playDrawabale = ContextCompat.getDrawable(context, android.R.drawable.ic_media_play)
-        mPlayPauseButton?.setImageDrawable(playDrawabale)
-        mSeekbar?.progress = 0
+        mPlayPauseButton.setImageDrawable(playDrawabale)
+        mSeekbar.progress = 0
+        mTimer.setText("0:0")
     }
 
-    override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-        return false
-    }
+    override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean = false
 
     override fun onPrepared(mp: MediaPlayer?) {
     }
@@ -116,8 +115,7 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
-            val progress = seekBar?.progress
-            mMediaPlayer?.seekTo(progress!!)
+            mMediaPlayer?.seekTo(progress)
         }
     }
 
