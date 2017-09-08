@@ -42,7 +42,6 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         str = File.separator + title + File.separator + title + ".mp3"
         file = File(applicationContext!!.getExternalFilesDir(null), str)
         directory = File(applicationContext!!.getExternalFilesDir(null), File.separator + title)
-        //createDirectory(directory.toString())
 
         audiobook = getAudiobook(url)
 
@@ -101,7 +100,6 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
                 invalidateOptionsMenu()
             }else{
                 downloadMp3File(file!!, urlFile)
-                //invalidateOptionsMenu()
             }
         }
 

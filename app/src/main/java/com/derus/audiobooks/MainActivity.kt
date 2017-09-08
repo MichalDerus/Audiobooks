@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.SearchView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
     override fun OnBookClick(url: String, imageUrl: String, title: String, author: String) {
         //Toast.makeText(applicationContext, url, Toast.LENGTH_SHORT).show()
         if (url.isEmpty()) {
-            Toast.makeText(applicationContext, "Nie ma url!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Nie ma url!", Toast.LENGTH_SHORT).show()
         } else {
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra("EXTRA_URL", url)
@@ -48,7 +49,6 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //val recyclerView = recyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
         val api = ApiService()
         val list = ArrayList<AudiobookResponse>()
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
 
         api.getAudiobooksList().enqueue(object: Callback<ArrayList<AudiobookResponse>> {
             override fun onFailure(call: Call<ArrayList<AudiobookResponse>>?, t: Throwable?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                download_data_error.visibility = View.VISIBLE
             }
 
             override fun onResponse(call: Call<ArrayList<AudiobookResponse>>?, response: Response<ArrayList<AudiobookResponse>>?) {
@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
                     list.addAll(response.body()!!)
                     list.sortBy { it.title }
                     recyclerView.adapter.notifyDataSetChanged()
+                    download_data_error.visibility = View.INVISIBLE
                 }
             }
         })
@@ -76,14 +77,9 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.main, menu)
 
-/*        val searchManager = getSystemService(SEARCH_SERVICE) as SearchManager
-        val searchMenuItem = menu?.findItem(R.id.search)
-        val searchView = searchMenuItem?.getActionView()!! as SearchView*/
-
         val searchManager = getSystemService(SEARCH_SERVICE) as SearchManager
         val searchView = menu!!.findItem(R.id.search).actionView as? SearchView
         searchView?.setSearchableInfo(searchManager.getSearchableInfo(componentName))
-
 
         searchView?.setSubmitButtonEnabled(false)
         searchView?.setOnQueryTextListener(this)
@@ -95,9 +91,6 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
 
         val id = item?.itemId
         if(id == R.id.action_delete_all){
-            //deleteFiles(File(this.getExternalFilesDir(null).toString()))
-            //Log.i("aaa", this.getExternalFilesDir(null).toString())
-
             alert("Czy chcesz usunąć wszystkie pobrane pliki?") {
                 positiveButton("Tak") { deleteFiles(File(application.getExternalFilesDir(null).toString())) }
                 negativeButton("Nie") {  }

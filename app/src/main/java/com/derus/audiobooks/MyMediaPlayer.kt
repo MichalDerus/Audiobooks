@@ -21,11 +21,6 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
         createMediaPlayerIfNeeded()
     }
 
-    /**
-     * Makes sure the media player exists and has been reset. This will create
-     * the media player if needed, or reset the existing media player if one
-     * already exists.
-     */
 
     fun getMediaPlayer(): MediaPlayer? = mMediaPlayer
 
@@ -102,7 +97,7 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
         val playDrawabale = ContextCompat.getDrawable(context, android.R.drawable.ic_media_play)
         mPlayPauseButton.setImageDrawable(playDrawabale)
         mSeekbar.progress = 0
-        mTimer.setText("0:0")
+        mTimer.setText(R.string.timer_format)
     }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean = false
