@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Audiobooks</string>
+    <string name="search">Search</string>
+    <string name="delete_all">Delete all</string>
 </resources>
