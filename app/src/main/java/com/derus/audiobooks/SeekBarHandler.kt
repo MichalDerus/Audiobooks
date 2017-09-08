@@ -18,11 +18,10 @@ class SeekBarHandler(val seekbar: SeekBar?, var mediaPlayer: MediaPlayer?, var i
     override fun onProgressUpdate(vararg values: Void?) {
         super.onProgressUpdate(*values)
         val time = mediaPlayer?.getCurrentPosition()!!
+        val maxTime = seekbar?.max
         seekbar?.setProgress(time);
-        var seconds = (time / 1000)
-        val minutes = time / (1000 * 60) % 60
-        seconds = seconds - minutes * 60
-        timer.setText(minutes.toString()+":"+seconds.toString())
+
+        timer.setText(Utils.getTimeString(time.toLong()) + " / " + Utils.getTimeString(maxTime!!.toLong()))
     }
 
     override fun onCancelled() {

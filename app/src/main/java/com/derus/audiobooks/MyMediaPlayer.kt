@@ -31,7 +31,7 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
 
     fun resetProgress(){
         mSeekbar.progress = 0
-        mTimer.setText("0:0")
+        mTimer.setText(R.string.timer_format)
     }
 
 

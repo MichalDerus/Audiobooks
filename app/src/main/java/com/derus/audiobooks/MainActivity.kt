@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity(), OnBookClickListener, SearchView.OnQuer
         searchView?.setSearchableInfo(searchManager.getSearchableInfo(componentName))
 
 
-        searchView?.setSubmitButtonEnabled(true)
+        searchView?.setSubmitButtonEnabled(false)
         searchView?.setOnQueryTextListener(this)
 
         return true

@@ -14,7 +14,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.*
+import java.io.File
 
 
 class DetailActivity : AppCompatActivity(), View.OnClickListener {
@@ -46,8 +46,10 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
 
         audiobook = getAudiobook(url)
 
-        if (file!!.exists())
-        mMyMediaPlayer = MyMediaPlayer(this, file!!, play_pause_btn, progressbar, tv_progress)
+        if (file!!.exists()) {
+            mMyMediaPlayer = MyMediaPlayer(this, file!!, play_pause_btn, progressbar, tv_progress)
+            tv_progress.setText("00:00:00 / " + Utils.getDurationFromFile(file!!))
+        }
 
         play_pause_btn.setOnClickListener(this)
 
@@ -148,13 +150,13 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
                 if (response?.isSuccessful!!) {
-                    val isFileDownloaded = writeResponseBodyToDisk(response.body()!!, pdfFile)
+                    val isFileDownloaded = Utils.writeResponseBodyToDisk(response.body()!!, pdfFile)
                     if (isFileDownloaded){
                         Toast.makeText(applicationContext, "Pobrano", Toast.LENGTH_SHORT).show()
                     }
 
                     mMyMediaPlayer = MyMediaPlayer(applicationContext, file!!, play_pause_btn, progressbar, tv_progress)
-
+                    tv_progress.setText("00:00:00 / " + Utils.getDurationFromFile(file!!))
                     invalidateOptionsMenu()
                     progress.dismiss()
                 } else {
@@ -184,41 +186,6 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
             createDirectory(directory.toString())
             downloadAudiobookMedia(file, url)
         }
-    }
-
-    fun writeResponseBodyToDisk(body: ResponseBody, file: File): Boolean {
-        try {
-            var inputStream: InputStream? = null
-            var outputStream: OutputStream? = null
-            try {
-                val fileReader = ByteArray(4096)
-                var fileSizeDownloaded: Long = 0
-                inputStream = body.byteStream()
-                outputStream = FileOutputStream(file)
-                while (true) {
-                    val read = inputStream!!.read(fileReader)
-                    if (read == -1) {
-                        break
-                    }
-                    outputStream.write(fileReader, 0, read)
-                    fileSizeDownloaded += read.toLong()
-                }
-                outputStream.flush()
-                return true
-            } catch (e: IOException) {
-                return false
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close()
-                }
-                if (outputStream != null) {
-                    outputStream.close()
-                }
-            }
-        } catch (e: IOException) {
-            return false
-        }
-
     }
 
     fun createDirectory(directory: String) {
