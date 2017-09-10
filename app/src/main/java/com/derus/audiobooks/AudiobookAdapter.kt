@@ -1,5 +1,7 @@
 package com.derus.audiobooks
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -11,12 +13,11 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_list.view.*
 
 
-class AudiobookAdapter(val resultsList: ArrayList<AudiobookResponse>, val listener: OnBookClickListener) : RecyclerView.Adapter<AudiobookAdapter.ViewHolder>(),
+class AudiobookAdapter(val context: Context, val pref: SharedPreferences, val resultsList: ArrayList<AudiobookResponse>, val listener: OnBookClickListener) : RecyclerView.Adapter<AudiobookAdapter.ViewHolder>(),
         SectionTitleProvider, Filterable {
 
     var filteredList: ArrayList<AudiobookResponse> = resultsList
     var audiobookFilter: AudiobookFilter? = null
-
 
     override fun getFilter(): Filter {
         if (audiobookFilter == null){
@@ -25,8 +26,19 @@ class AudiobookAdapter(val resultsList: ArrayList<AudiobookResponse>, val listen
         return audiobookFilter!!
     }
 
-    override fun getSectionTitle(position: Int): String =
-            filteredList.get(position).title.substring(0,1)
+    override fun getSectionTitle(position: Int): String {
+        val orderBy = pref.getString(context.getString(R.string.settings_order_by_key), context.getString(R.string.settings_order_by_default))
+        when(orderBy){
+            context.getString(R.string.settings_order_by_title_value) -> {
+                return filteredList.get(position).title.substring(0, 1)
+            }
+            context.getString(R.string.settings_order_by_author_value) -> {
+                return filteredList.get(position).author.substring(0, 1)
+            }
+            else -> return filteredList.get(position).title.substring(0, 1)
+        }
+        //return filteredList.get(position).title.substring(0, 1)
+    }
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
         holder?.bindAudiobooks(filteredList[position])

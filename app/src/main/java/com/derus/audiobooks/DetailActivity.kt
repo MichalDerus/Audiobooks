@@ -1,23 +1,19 @@
 package com.derus.audiobooks
 
-import android.app.ProgressDialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_detail.*
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 
 
-class DetailActivity : AppCompatActivity(), View.OnClickListener {
+class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFileListener {
 
     private var mMyMediaPlayer: MyMediaPlayer? = null
     private val api = ApiService()
@@ -25,6 +21,8 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
     private var file: File? = null
     private var directory: File? = null
     private var urlFile: String = ""
+    lateinit var  extraUrl: String
+    private var downloadFile: DownloadFile? = null
 
     private var audiobook = Audiobook()
 
@@ -32,7 +30,7 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
-        val url = intent.getStringExtra("EXTRA_URL")
+        extraUrl = intent.getStringExtra("EXTRA_URL")
         val imageUrl = intent.getStringExtra("EXTRA_IMAGE_URL")
         val title = intent.getStringExtra("EXTRA_TITLE")
         val author = intent.getStringExtra("EXTRA_AUTHOR")
@@ -43,7 +41,7 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         file = File(applicationContext!!.getExternalFilesDir(null), str)
         directory = File(applicationContext!!.getExternalFilesDir(null), File.separator + title)
 
-        audiobook = getAudiobook(url)
+        audiobook = getAudiobook(extraUrl)
 
         if (file!!.exists()) {
             mMyMediaPlayer = MyMediaPlayer(this, file!!, play_pause_btn, progressbar, tv_progress)
@@ -60,6 +58,7 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onPause() {
         super.onPause()
+
         if (mMyMediaPlayer?.getMediaPlayer() != null && mMyMediaPlayer!!.isPlaying()) {
             mMyMediaPlayer!!.pauseAudio()
         }
@@ -75,6 +74,12 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         if (v?.id == R.id.play_pause_btn) {
             togglePlayback()
         }
+    }
+
+    override fun onDownloadFinish() {
+        invalidateOptionsMenu()
+        tv_progress.setText("00:00:00 / " + Utils.getDurationFromFile(file!!))
+        mMyMediaPlayer = MyMediaPlayer(this, file!!, play_pause_btn, progressbar, tv_progress)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -93,11 +98,17 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
 
         val id = item?.itemId
         if(id == R.id.action_download){
-            if (file?.exists()!! && !mMyMediaPlayer!!.isPlaying()){
-                deleteFiles(directory!!)
-                mMyMediaPlayer?.relaxResources(true)
-                mMyMediaPlayer?.resetProgress()
-                invalidateOptionsMenu()
+            if (file?.exists()!!){
+                if (mMyMediaPlayer?.getMediaPlayer() != null && !mMyMediaPlayer!!.isPlaying()){
+                    Utils.deleteFiles(directory!!)
+                    mMyMediaPlayer?.relaxResources(true)
+                    mMyMediaPlayer?.resetProgress()
+                    invalidateOptionsMenu()
+                }else{
+            /*        Utils.deleteFiles(directory!!)
+                    invalidateOptionsMenu()
+                    tv_progress.setText(R.string.timer_format)*/
+                }
             }else{
                 downloadMp3File(file!!, urlFile)
             }
@@ -139,50 +150,13 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
         return audiobook
     }
 
-    fun downloadAudiobookMedia(pdfFile: File, url: String) {
-
-        val progress = ProgressDialog(this)
-        progress.setMessage("Pobieranie pliku..")
-
-        val call = api.downloadFile(url)
-        call.enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
-                if (response?.isSuccessful!!) {
-                    val isFileDownloaded = Utils.writeResponseBodyToDisk(response.body()!!, pdfFile)
-                    if (isFileDownloaded){
-                        Toast.makeText(applicationContext, "Pobrano", Toast.LENGTH_SHORT).show()
-                    }
-
-                    mMyMediaPlayer = MyMediaPlayer(applicationContext, file!!, play_pause_btn, progressbar, tv_progress)
-                    tv_progress.setText("00:00:00 / " + Utils.getDurationFromFile(file!!))
-                    invalidateOptionsMenu()
-                    progress.dismiss()
-                } else {
-                    Toast.makeText(applicationContext, "Błąd pobierania", Toast.LENGTH_SHORT).show()
-                    progress.dismiss()
-                    deleteFiles(file!!)
-                }
-            }
-
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable?) {
-                progress.dismiss()
-                Toast.makeText(applicationContext, "Błąd pobierania", Toast.LENGTH_SHORT).show()
-                deleteFiles(file!!)
-            }
-        })
-
-        progress.setButton(DialogInterface.BUTTON_NEGATIVE, "Anuluj", {
-            _, _ ->
-            progress.dismiss()
-            call.cancel()
-        })
-        progress.show()
-    }
-
     fun downloadMp3File(file: File, url: String){
         if (urlFile.length > 0 && !file.exists()){
             createDirectory(directory.toString())
-            downloadAudiobookMedia(file, url)
+            downloadFile = DownloadFile(this, file, url, this)
+            downloadFile?.execute()
+        }else{
+            getAudiobook(extraUrl)
         }
     }
 
@@ -192,11 +166,44 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener {
             directoryFile.mkdirs()
     }
 
-    fun deleteFiles(fileOrDirectory: File) {
-        if (fileOrDirectory.isDirectory)
-            for (child in fileOrDirectory.listFiles())
-                deleteFiles(child)
+/*    fun downloadAudiobookMedia(pdfFile: File, url: String) {
 
-        fileOrDirectory.delete()
-    }
+        val progress = ProgressDialog(this)
+        progress.setMessage(getString(R.string.downloading_file))
+
+        val call = api.downloadFile(url)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
+                if (response?.isSuccessful!!) {
+
+                    val isFileDownloaded = Utils.writeResponseBodyToDisk(response.body()!!, pdfFile)
+                    if (isFileDownloaded){
+                        toast(getString(R.string.downloaded))
+                    }
+
+                    mMyMediaPlayer = MyMediaPlayer(applicationContext, file!!, play_pause_btn, progressbar, tv_progress)
+                    tv_progress.setText("00:00:00 / " + Utils.getDurationFromFile(file!!))
+                    invalidateOptionsMenu()
+                    progress.dismiss()
+                } else {
+                    toast(getString(R.string.loading_data_error))
+                    progress.dismiss()
+                    Utils.deleteFiles(file!!)
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable?) {
+                progress.dismiss()
+                toast(getString(R.string.loading_data_error))
+                Utils.deleteFiles(file!!)
+            }
+        })
+
+        progress.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.action_cancel), {
+            _, _ ->
+            progress.dismiss()
+            call.cancel()
+        })
+        progress.show()
+    }*/
 }

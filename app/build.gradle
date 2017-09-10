@@ -36,7 +36,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
     compile 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
-    compile "org.jetbrains.anko:anko-commons:0.10.1"
+    compile "org.jetbrains.anko:anko:0.10.1"
     testCompile 'junit:junit:4.12'
 }
 repositories {

@@ -4,9 +4,7 @@ import android.media.MediaMetadataRetriever
 import okhttp3.ResponseBody
 import java.io.*
 
-/**
- * Created by Michal on 08.09.2017.
- */
+
 class Utils{
     companion object {
         fun writeResponseBodyToDisk(body: ResponseBody, file: File): Boolean {
@@ -62,11 +60,22 @@ class Utils{
         }
 
         fun getDurationFromFile(file: File): String{
-            val data = MediaMetadataRetriever()
-            data.setDataSource(file.absolutePath)
-            val duration: String = getTimeString(data.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong())
-            data.release()
+            var duration = getTimeString(0)
+            if (file.exists()) {
+                val data = MediaMetadataRetriever()
+                data.setDataSource(file.absolutePath)
+                duration = getTimeString(data.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong())
+                data.release()
+            }
             return duration
+        }
+
+        fun deleteFiles(fileOrDirectory: File) {
+            if (fileOrDirectory.isDirectory)
+                for (child in fileOrDirectory.listFiles())
+                    deleteFiles(child)
+
+            fileOrDirectory.delete()
         }
     }
 }

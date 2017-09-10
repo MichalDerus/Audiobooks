@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Audiobooks</string>
+    <string name="search">Szukaj</string>
+    <string name="delete_all">Usuń wszystkie</string>
+    <string name="timer_format">00:00:00 / 00:00:00</string>
+    <string name="loading_data_error">Błąd pobierania danych</string>
+    <string name="message_delete_all_books">Czy chcesz usunąć wszystkie pobrane pliki?</string>
+    <string name="action_yes">Tak</string>
+    <string name="action_no">Nie</string>
+    <string name="action_cancel">Anuluj</string>
+    <string name="downloaded">Pobrano</string>
+    <string name="downloading_file">Pobieranie pliku..</string>
+    <string name="sort_by">Sortowanie</string>
+
+    <plurals name="numberOfBooksDeleted">
+        <item quantity="one">Usunięto %d książkę.</item>
+        <item quantity="few">Usunięto %d książki.</item>
+        <item quantity="many">Usunięto %d książek.</item>
+        <item quantity="other">Usunięto %d książek.</item>
+    </plurals>
+
+    <string name="settings_order_by_label">Sortuj po</string>
+
+    <string name="settings_order_by_title_label">Tytuł</string>
+
+    <string name="settings_order_by_author_label">Autor</string>
+</resources>

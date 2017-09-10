@@ -5,9 +5,7 @@ import android.os.AsyncTask
 import android.widget.SeekBar
 import android.widget.TextView
 
-/**
- * Created by Michal on 01.09.2017.
- */
+
 class SeekBarHandler(val seekbar: SeekBar?, var mediaPlayer: MediaPlayer?, var isViewOn: Boolean, val timer: TextView): AsyncTask<Void, Void, Boolean>() {
 
     override fun onPreExecute() {
@@ -19,7 +17,7 @@ class SeekBarHandler(val seekbar: SeekBar?, var mediaPlayer: MediaPlayer?, var i
         super.onProgressUpdate(*values)
         val time = mediaPlayer?.getCurrentPosition()!!
         val maxTime = seekbar?.max
-        seekbar?.setProgress(time);
+        seekbar?.setProgress(time)
 
         timer.setText(Utils.getTimeString(time.toLong()) + " / " + Utils.getTimeString(maxTime!!.toLong()))
     }

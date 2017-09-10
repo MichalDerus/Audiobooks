@@ -3,5 +3,28 @@
     <string name="search">Search</string>
     <string name="delete_all">Delete all</string>
     <string name="timer_format">00:00:00 / 00:00:00</string>
-    <string name="loading_data_error">Błąd pobierania danych</string>
+    <string name="loading_data_error">Error downloading data</string>
+    <string name="message_delete_all_books">Do you want to delete all books?</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="downloading_file">Downloading file..</string>
+    <string name="sort_by">Sort By</string>
+
+    <plurals name="numberOfBooksDeleted">
+        <item quantity="one">Deleted %d book.</item>
+        <item quantity="other">Deleted %d books.</item>
+    </plurals>
+
+    <string name="settings_order_by_label">Order By</string>
+    <string name="settings_order_by_key" translatable="false">order_by</string>
+    <string name="settings_order_by_default" translatable="false">@string/settings_order_by_title_value</string>
+
+    <string name="settings_order_by_title_label">Title</string>
+    <string name="settings_order_by_title_value" translatable="false">title</string>
+
+    <string name="settings_order_by_author_label">Author</string>
+    <string name="settings_order_by_author_value" translatable="false">author</string>
+
 </resources>
