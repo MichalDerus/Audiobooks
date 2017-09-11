@@ -1,4 +1,4 @@
-package com.derus.audiobooks
+package com.derus.audiobooks.utilities
 
 import android.media.MediaPlayer
 import android.os.AsyncTask
@@ -6,7 +6,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 
 
-class SeekBarHandler(val seekbar: SeekBar?, var mediaPlayer: MediaPlayer?, var isViewOn: Boolean, val timer: TextView): AsyncTask<Void, Void, Boolean>() {
+class SeekBarHandler(val seekbar: SeekBar?, var mediaPlayer: MediaPlayer?, var isViewOn: Boolean, val timer: TextView) : AsyncTask<Void, Void, Boolean>() {
 
     override fun onPreExecute() {
         super.onPreExecute()
@@ -27,7 +27,7 @@ class SeekBarHandler(val seekbar: SeekBar?, var mediaPlayer: MediaPlayer?, var i
         setViewOnOff(false)
     }
 
-    fun setViewOnOff(isOn:Boolean) {
+    fun setViewOnOff(isOn: Boolean) {
         isViewOn = isOn
     }
 

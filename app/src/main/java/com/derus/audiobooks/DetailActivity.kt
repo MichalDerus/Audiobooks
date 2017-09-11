@@ -5,6 +5,12 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.derus.audiobooks.listener.OnDownloadFileListener
+import com.derus.audiobooks.model.Audiobook
+import com.derus.audiobooks.rest.ApiService
+import com.derus.audiobooks.utilities.DownloadFile
+import com.derus.audiobooks.utilities.MyMediaPlayer
+import com.derus.audiobooks.utilities.Utils
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_detail.*
 import retrofit2.Call
@@ -21,7 +27,7 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
     private var file: File? = null
     private var directory: File? = null
     private var urlFile: String = ""
-    lateinit var  extraUrl: String
+    lateinit var extraUrl: String
     private var downloadFile: DownloadFile? = null
 
     private var audiobook = Audiobook()
@@ -29,6 +35,8 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
+
+        setSupportActionBar(toolbar)
 
         extraUrl = intent.getStringExtra("EXTRA_URL")
         val imageUrl = intent.getStringExtra("EXTRA_IMAGE_URL")
@@ -86,9 +94,9 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.detail, menu)
 
-        if (file!!.exists()){
+        if (file!!.exists()) {
             menu?.findItem(R.id.action_download)?.setIcon(R.drawable.ic_delete_file)
-        }else{
+        } else {
             menu?.findItem(R.id.action_download)?.setIcon(R.drawable.ic_download_file)
         }
         return true
@@ -97,19 +105,19 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 
         val id = item?.itemId
-        if(id == R.id.action_download){
-            if (file?.exists()!!){
-                if (mMyMediaPlayer?.getMediaPlayer() != null && !mMyMediaPlayer!!.isPlaying()){
+        if (id == R.id.action_download) {
+            if (file?.exists()!!) {
+                if (mMyMediaPlayer?.getMediaPlayer() != null && !mMyMediaPlayer!!.isPlaying()) {
                     Utils.deleteFiles(directory!!)
                     mMyMediaPlayer?.relaxResources(true)
                     mMyMediaPlayer?.resetProgress()
                     invalidateOptionsMenu()
-                }else{
-            /*        Utils.deleteFiles(directory!!)
-                    invalidateOptionsMenu()
-                    tv_progress.setText(R.string.timer_format)*/
+                } else {
+                    /*        Utils.deleteFiles(directory!!)
+                            invalidateOptionsMenu()
+                            tv_progress.setText(R.string.timer_format)*/
                 }
-            }else{
+            } else {
                 downloadMp3File(file!!, urlFile)
             }
         }
@@ -127,14 +135,14 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
                     mMyMediaPlayer!!.playAudio()
                 }
             }
-        }else {
+        } else {
             downloadMp3File(file!!, urlFile)
         }
     }
 
-    fun getAudiobook(url: String): Audiobook{
+    fun getAudiobook(url: String): Audiobook {
         var audiobook = Audiobook()
-        api.getAudiobook(url).enqueue(object: Callback<Audiobook>{
+        api.getAudiobook(url).enqueue(object : Callback<Audiobook> {
             override fun onResponse(call: Call<Audiobook>?, response: Response<Audiobook>?) {
                 if (response != null) {
                     audiobook = response.body()!!
@@ -150,12 +158,12 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
         return audiobook
     }
 
-    fun downloadMp3File(file: File, url: String){
-        if (urlFile.length > 0 && !file.exists()){
+    fun downloadMp3File(file: File, url: String) {
+        if (urlFile.length > 0 && !file.exists()) {
             createDirectory(directory.toString())
             downloadFile = DownloadFile(this, file, url, this)
             downloadFile?.execute()
-        }else{
+        } else {
             getAudiobook(extraUrl)
         }
     }

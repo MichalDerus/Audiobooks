@@ -1,4 +1,4 @@
-package com.derus.audiobooks
+package com.derus.audiobooks.utilities
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
+import com.derus.audiobooks.R
 import java.io.File
 
 class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: ImageButton, val mSeekbar: SeekBar, val mTimer: TextView) : MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener, MediaPlayer.OnErrorListener,
@@ -24,7 +25,7 @@ class MyMediaPlayer(val context: Context, var file: File, val mPlayPauseButton: 
 
     fun getMediaPlayer(): MediaPlayer? = mMediaPlayer
 
-    fun resetProgress(){
+    fun resetProgress() {
         mSeekbar.progress = 0
         mTimer.setText(R.string.timer_format)
     }

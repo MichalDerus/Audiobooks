@@ -1,9 +1,11 @@
-package com.derus.audiobooks
+package com.derus.audiobooks.utilities
 
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.AsyncTask
+import com.derus.audiobooks.R
+import com.derus.audiobooks.listener.OnDownloadFileListener
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -21,8 +23,7 @@ class DownloadFile(val context: Context, val file: File, val url: String, val li
         progressDialog.setCancelable(false)
         progressDialog.setMax(100)
         progressDialog.setMessage(context.getString(R.string.downloading_file))
-        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.action_cancel), {
-            _, _ ->
+        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.action_cancel), { _, _ ->
             progressDialog.dismiss()
             cancel(true)
             //Utils.deleteFiles(file)
@@ -46,7 +47,7 @@ class DownloadFile(val context: Context, val file: File, val url: String, val li
             var total: Long = 0
 
             while (true) {
-                if (isCancelled){
+                if (isCancelled) {
                     Utils.deleteFiles(file)
                     output.close()
                     input.close()

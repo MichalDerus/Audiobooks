@@ -1,11 +1,11 @@
-package com.derus.audiobooks
+package com.derus.audiobooks.utilities
 
 import android.media.MediaMetadataRetriever
 import okhttp3.ResponseBody
 import java.io.*
 
 
-class Utils{
+class Utils {
     companion object {
         fun writeResponseBodyToDisk(body: ResponseBody, file: File): Boolean {
             try {
@@ -59,7 +59,7 @@ class Utils{
             return buf.toString()
         }
 
-        fun getDurationFromFile(file: File): String{
+        fun getDurationFromFile(file: File): String {
             var duration = getTimeString(0)
             if (file.exists()) {
                 val data = MediaMetadataRetriever()
