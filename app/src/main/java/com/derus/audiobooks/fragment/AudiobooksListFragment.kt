@@ -69,7 +69,7 @@ class AudiobooksListFragment() : Fragment(), OnBookClickListener, SearchView.OnQ
         sortAuthorValue = getString(R.string.settings_order_by_author_value)
         sortKey = getString(R.string.settings_order_by_key)
 
-
+        progress_audiobook.visibility = View.VISIBLE
         recyclerView.layoutManager = LinearLayoutManager(activity)
         val api = ApiService()
         //val list = ArrayList<AudiobookResponse>()
@@ -80,15 +80,23 @@ class AudiobooksListFragment() : Fragment(), OnBookClickListener, SearchView.OnQ
 
         api.getAudiobooksList().enqueue(object : Callback<ArrayList<AudiobookResponse>> {
             override fun onFailure(call: Call<ArrayList<AudiobookResponse>>?, t: Throwable?) {
-                download_data_error.visibility = View.VISIBLE
+                download_data_error_audiobooks.visibility = View.VISIBLE
+                progress_audiobook.visibility = View.INVISIBLE
             }
 
             override fun onResponse(call: Call<ArrayList<AudiobookResponse>>?, response: Response<ArrayList<AudiobookResponse>>?) {
                 if (response != null && response.isSuccessful) {
-                    list.addAll(response.body()!!)
+                    for (item in response.body()!!){
+                        item.title = item.title.replace("[()\\[\\]*]".toRegex(), "").replace("^[\\s]".toRegex(), "")
+                        list.add(item)
+                    }
                     sortBy(list, getPref(sortKey))
                     recyclerView.adapter.notifyDataSetChanged()
-                    download_data_error.visibility = View.INVISIBLE
+                    download_data_error_audiobooks.visibility = View.INVISIBLE
+                    progress_audiobook.visibility = View.INVISIBLE
+                }else{
+                    download_data_error_audiobooks.visibility = View.VISIBLE
+                    progress_audiobook.visibility = View.INVISIBLE
                 }
             }
         })

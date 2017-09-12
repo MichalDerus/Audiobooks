@@ -13,6 +13,7 @@ import com.derus.audiobooks.utilities.MyMediaPlayer
 import com.derus.audiobooks.utilities.Utils
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_detail.*
+import org.jetbrains.anko.toast
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -37,6 +38,10 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
         setContentView(R.layout.activity_detail)
 
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         extraUrl = intent.getStringExtra("EXTRA_URL")
         val imageUrl = intent.getStringExtra("EXTRA_IMAGE_URL")
@@ -112,6 +117,7 @@ class DetailActivity : AppCompatActivity(), View.OnClickListener, OnDownloadFile
                     mMyMediaPlayer?.relaxResources(true)
                     mMyMediaPlayer?.resetProgress()
                     invalidateOptionsMenu()
+                    toast("Usunięto plik")
                 } else {
                     /*        Utils.deleteFiles(directory!!)
                             invalidateOptionsMenu()

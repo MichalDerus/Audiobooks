@@ -51,17 +51,28 @@ class AuthorsListFragment : Fragment(), OnBookClickListener {
         val api = ApiService()
         listView = list as AnimatedExpandableListView
         adapter = AuthorsListAdapter(activity, this)
+        progress_author.visibility = View.VISIBLE
 
         api.getAudiobooksList().enqueue(object : Callback<ArrayList<AudiobookResponse>> {
             override fun onFailure(call: Call<ArrayList<AudiobookResponse>>?, t: Throwable?) {
-
+                progress_author.visibility = View.INVISIBLE
+                download_data_error_authors.visibility = View.VISIBLE
             }
 
             override fun onResponse(call: Call<ArrayList<AudiobookResponse>>?, response: Response<ArrayList<AudiobookResponse>>?) {
                 if (response != null && response.isSuccessful) {
-                    listOfItems = createGroupItemList(response.body()!!)
+                    val list = ArrayList<AudiobookResponse>()
+                    for (item in response.body()!!){
+                        item.title = item.title.replace("[()\\[\\]*]".toRegex(), "").replace("^[\\s]".toRegex(), "")
+                        list.add(item)
+                    }
+                    listOfItems = createGroupItemList(list)
                     adapter!!.setData(listOfItems)
                     listView?.setAdapter(adapter)
+                    progress_author.visibility = View.INVISIBLE
+                }else{
+                    progress_author.visibility = View.INVISIBLE
+                    download_data_error_authors.visibility = View.VISIBLE
                 }
             }
         })
